@@ -1,0 +1,23 @@
+# RideWise Dashboard Dependencies
+# FastAPI Backend
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+pydantic>=2.6.0
+
+# Machine Learning
+scikit-learn>=1.3.0
+pandas>=2.0.0
+numpy>=1.24.0
+shap>=0.42.0
+
+# Visualization
+matplotlib>=3.7.0
+plotly>=5.15.0
+
+# Streamlit Dashboard
+streamlit>=1.28.0
+requests>=2.31.0
+
+# Utilities
+python-multipart>=0.0.6
+joblib>=1.3.0
