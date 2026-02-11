@@ -84,7 +84,7 @@ interface SampleRider {
 }
 
 // API Configuration
-const API_URL = process.env.API_URL || "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || "http://localhost:8000";
 
 // Utility Functions
 const cn = (...classes: (string | boolean | undefined)[]) => classes.filter(Boolean).join(" ");

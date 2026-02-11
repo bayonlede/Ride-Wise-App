@@ -1,6 +1,7 @@
+# Railway config for API service - use with Root Directory = "" (project root)
 [build]
 builder = "DOCKERFILE"
-dockerfilePath = "Dockerfile"
+dockerfilePath = "Dockerfile.api"
 
 [deploy]
 startCommand = "python run_api.py"

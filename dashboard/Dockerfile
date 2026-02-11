@@ -22,10 +22,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the entire dashboard directory
 COPY . .
 
-# Copy model and data from parent directories
-COPY ../model /app/../model
-COPY ../data /app/../data
-
+# Note: When Root Directory = "dashboard", model/data are not in context.
+# Use Dockerfile.api at project root with Root Directory = "" for API deployment.
 # Expose port
 EXPOSE 8000
 
