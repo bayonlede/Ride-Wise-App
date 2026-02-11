@@ -85,6 +85,7 @@ Follow these steps to deploy the dashboard UI as a separate service alongside yo
 **CORS errors**:
 - The API should already allow all origins (`allow_origins=["*"]`). If issues persist, check the API logs.
 
-**Build fails**:
-- Ensure Root Directory is `frontend`.
-- Check that `Dockerfile` exists in the `frontend` folder.
+**Build fails / "context canceled"**:
+- Ensure **Root Directory** is `frontend` in the service Settings.
+- **Redeploy** – "context canceled" is often a transient timeout; try again.
+- Verify no other `railway.toml` is overriding (the API has one at project root; the frontend uses `frontend/railway.toml`).
