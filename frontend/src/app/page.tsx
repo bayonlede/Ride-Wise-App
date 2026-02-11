@@ -83,8 +83,8 @@ interface SampleRider {
   features: RiderFeatures;
 }
 
-// API Configuration
-const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || "http://localhost:8000";
+// Fallback for build-time env (used if /api/config fails)
+const FALLBACK_API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || "http://localhost:8000";
 
 // Utility Functions
 const cn = (...classes: (string | boolean | undefined)[]) => classes.filter(Boolean).join(" ");
@@ -111,13 +111,13 @@ const formatFeatureName = (name: string) => {
 };
 
 // Components
-function Header() {
+function Header({ apiUrl }: { apiUrl: string }) {
   const [apiStatus, setApiStatus] = useState<"loading" | "connected" | "error">("loading");
 
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        const res = await fetch(`${API_URL}/health`);
+        const res = await fetch(`${apiUrl}/health`);
         if (res.ok) setApiStatus("connected");
         else setApiStatus("error");
       } catch {
@@ -127,7 +127,7 @@ function Header() {
     checkHealth();
     const interval = setInterval(checkHealth, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [apiUrl]);
 
   return (
     <header className="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/50">
@@ -144,7 +144,10 @@ function Header() {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/50 border border-slate-700/50">
+            <div
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/50 border border-slate-700/50"
+              title={apiStatus === "error" ? `Trying: ${apiUrl}` : undefined}
+            >
               <div
                 className={cn(
                   "w-2 h-2 rounded-full",
@@ -821,19 +824,29 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [apiUrl, setApiUrl] = useState<string>(FALLBACK_API_URL);
+
+  // Fetch API URL from server at runtime (Railway injects vars at runtime)
+  useEffect(() => {
+    fetch("/api/config")
+      .then((r) => r.json())
+      .then((data) => setApiUrl(data.apiUrl || FALLBACK_API_URL))
+      .catch(() => {});
+  }, []);
+
   // Load initial data
   useEffect(() => {
     const loadData = async () => {
       try {
         // Load sample riders
-        const samplesRes = await fetch(`${API_URL}/sample-riders`);
+        const samplesRes = await fetch(`${apiUrl}/sample-riders`);
         if (samplesRes.ok) {
           const data = await samplesRes.json();
           setSampleRiders(data.samples);
         }
 
         // Load feature importance
-        const importanceRes = await fetch(`${API_URL}/feature-importance`);
+        const importanceRes = await fetch(`${apiUrl}/feature-importance`);
         if (importanceRes.ok) {
           const data = await importanceRes.json();
           setFeatureImportance(data);
@@ -844,7 +857,7 @@ export default function Dashboard() {
     };
 
     loadData();
-  }, []);
+  }, [apiUrl]);
 
   const handlePredict = useCallback(async () => {
     setLoading(true);
@@ -852,7 +865,7 @@ export default function Dashboard() {
 
     try {
       // Get prediction
-      const predRes = await fetch(`${API_URL}/predict`, {
+      const predRes = await fetch(`${apiUrl}/predict`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(features),
@@ -863,7 +876,7 @@ export default function Dashboard() {
       setPrediction(predData);
 
       // Get SHAP explanation
-      const shapRes = await fetch(`${API_URL}/explain`, {
+      const shapRes = await fetch(`${apiUrl}/explain`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(features),
@@ -874,15 +887,21 @@ export default function Dashboard() {
         setShapResult(shapData);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "An error occurred");
+      const msg = e instanceof Error ? e.message : "An error occurred";
+      const isFetch = msg.toLowerCase().includes("fetch") || msg.toLowerCase().includes("network");
+      setError(
+        isFetch
+          ? `Failed to fetch: Could not reach API. Add NEXT_PUBLIC_API_URL (or API_URL) in Railway Variables for this service.`
+          : msg
+      );
     } finally {
       setLoading(false);
     }
-  }, [features]);
+  }, [features, apiUrl]);
 
   return (
     <div className="min-h-screen">
-      <Header />
+      <Header apiUrl={apiUrl} />
 
       {/* Hero Section */}
       <section className="relative py-12 overflow-hidden">

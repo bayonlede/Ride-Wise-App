@@ -33,19 +33,18 @@ Follow these steps to deploy the dashboard UI as a separate service alongside yo
    - Railway should auto-detect the Dockerfile
    - If not, ensure **Builder** is `DOCKERFILE` and **Dockerfile Path** is `Dockerfile`
 
-5. Under **Environment Variables**:
+5. Under **Environment Variables** (Variables tab):
    - Click **"+ New Variable"**
-   - **Name**: `NEXT_PUBLIC_API_URL`
+   - **Name**: `NEXT_PUBLIC_API_URL` (or `API_URL`)
    - **Value**: `https://YOUR-API-URL.up.railway.app`  
-     (Replace with your actual API URL. Do not add a trailing slash.)
+     (Replace with your actual API URL. No trailing slash.)
 
-   Example for API at `ride-wise-app-production.up.railway.app`:
+   Example:
    ```
    NEXT_PUBLIC_API_URL=https://ride-wise-app-production.up.railway.app
    ```
    
-   **Tip:** If your API is in the same project, you can use a reference variable:
-   `${{YOUR_API_SERVICE_NAME.RAILWAY_PUBLIC_DOMAIN}}` and prefix with `https://`
+   **Note:** The app fetches this at runtime via `/api/config`, so it works even if the variable wasn't set at build time. Add it, then redeploy.
 
 ---
 
@@ -78,9 +77,10 @@ Follow these steps to deploy the dashboard UI as a separate service alongside yo
 
 ## Troubleshooting
 
-**"API Offline"** in the dashboard:
-- Add `NEXT_PUBLIC_API_URL` and ensure it matches your API URL.
-- Redeploy after adding the variable (build-time env vars require a rebuild).
+**"API Offline"** or **"Failed to fetch"** when clicking Predict:
+- Add `NEXT_PUBLIC_API_URL` or `API_URL` in the frontend service's **Variables** tab.
+- Value must be your full API URL, e.g. `https://ride-wise-app-production.up.railway.app` (no trailing slash).
+- **Redeploy** so the new variable is applied.
 
 **CORS errors**:
 - The API should already allow all origins (`allow_origins=["*"]`). If issues persist, check the API logs.
