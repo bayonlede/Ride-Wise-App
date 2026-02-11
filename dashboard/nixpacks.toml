@@ -1,0 +1,9 @@
+# Nixpacks configuration for Python FastAPI backend
+[phases.setup]
+nixPkgs = ["python311"]
+
+[phases.install]
+cmds = ["pip install -r requirements.txt"]
+
+[start]
+cmd = "python run_api.py"
