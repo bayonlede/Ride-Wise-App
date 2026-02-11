@@ -273,6 +273,24 @@ app.add_middleware(
 )
 
 
+@app.get("/", tags=["Root"])
+async def root():
+    """Root endpoint - API info and available routes"""
+    return {
+        "name": "RideWise Churn Prediction API",
+        "version": "1.0.0",
+        "status": "running",
+        "docs": "/docs",
+        "health": "/health",
+        "endpoints": {
+            "predict": "POST /predict",
+            "explain": "POST /explain",
+            "feature_importance": "GET /feature-importance",
+            "sample_riders": "GET /sample-riders",
+        },
+    }
+
+
 @app.get("/health", response_model=HealthResponse, tags=["Health"])
 async def health_check():
     """Check API health status"""
