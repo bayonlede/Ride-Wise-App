@@ -88,12 +88,18 @@ class HealthResponse(BaseModel):
 
 def get_model_path() -> str:
     """Get the path to the model file"""
+    # Check for environment variable first (for Railway deployment)
+    if os.environ.get("MODEL_PATH"):
+        return os.environ.get("MODEL_PATH")
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     return os.path.join(base_dir, "model", "random_forest_model.pkl")
 
 
 def get_data_path() -> str:
     """Get the path to the training data for fitting transformers"""
+    # Check for environment variable first (for Railway deployment)
+    if os.environ.get("DATA_PATH"):
+        return os.environ.get("DATA_PATH")
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     return os.path.join(base_dir, "data", "processed_data", "rfms_table.csv")
 

@@ -206,6 +206,39 @@ curl -X POST "http://localhost:8000/predict" \
   }'
 ```
 
+## 🚀 Deployment on Railway
+
+### Quick Deploy
+
+1. **Connect GitHub Repository** to Railway
+2. **Create a new project** and select your repository
+3. **Set the root directory** to `dashboard`
+4. **Add environment variables**:
+   - `MODEL_PATH`: `/app/model/random_forest_model.pkl` (if using volume)
+   - `DATA_PATH`: `/app/data/processed_data/rfms_table.csv` (if using volume)
+5. **Deploy** - Railway auto-detects Python and deploys
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `PORT` | Server port (Railway sets automatically) | 8000 |
+| `MODEL_PATH` | Path to trained model | Auto-detected |
+| `DATA_PATH` | Path to training data | Auto-detected |
+| `PRODUCTION` | Enable production mode | Auto |
+
+### With Docker
+
+Railway will auto-detect the `Dockerfile` if present.
+
+```bash
+# Build locally
+docker build -t ridewise-api .
+
+# Run locally
+docker run -p 8000:8000 ridewise-api
+```
+
 ## 🛠️ Development
 
 ### Running Tests
