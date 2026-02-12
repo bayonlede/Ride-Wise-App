@@ -482,30 +482,30 @@ function PredictionResult({ prediction }: { prediction: PredictionResult }) {
 
       {/* Gauge Chart */}
       <div className="flex justify-center mb-6">
-        <div className="w-48 h-48">
+        <div className="relative w-48 h-40">
           <ResponsiveContainer width="100%" height="100%">
             <RadialBarChart
               cx="50%"
-              cy="50%"
-              innerRadius="60%"
+              cy="100%"
+              innerRadius="40%"
               outerRadius="100%"
-              barSize={20}
+              barSize={18}
               data={gaugeData}
               startAngle={180}
               endAngle={0}
             >
               <RadialBar
-                background={{ fill: "#1e293b" }}
+                background={{ fill: "#020617" }}
                 dataKey="value"
                 cornerRadius={10}
               />
             </RadialBarChart>
           </ResponsiveContainer>
-          <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ marginTop: "-80px" }}>
-            <span className="text-4xl font-bold" style={{ color: config.color }}>
+          <div className="absolute inset-0 flex flex-col items-center justify-center pb-4">
+            <span className="text-4xl font-bold leading-none" style={{ color: config.color }}>
               {probability}%
             </span>
-            <span className="text-sm text-slate-500">Churn Risk</span>
+            <span className="mt-1 text-sm text-slate-500">Churn Risk</span>
           </div>
         </div>
       </div>
