@@ -30,4 +30,3 @@ It combines a **FastAPI** machine‑learning backend with a **Next.js** analytic
 
 ---
 
-## 🧱 Architecture
