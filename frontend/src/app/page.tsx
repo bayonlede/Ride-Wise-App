@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import {
   BarChart,
   Bar,
@@ -144,6 +145,13 @@ function Header({ apiUrl }: { apiUrl: string }) {
           </div>
 
           <div className="flex items-center gap-4">
+            <Link
+              href="/analytics"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800/50 border border-slate-700/50 text-slate-300 hover:text-white hover:border-slate-600 transition-colors text-sm font-medium"
+            >
+              <BarChart3 className="w-4 h-4" />
+              Analytics
+            </Link>
             <div
               className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/50 border border-slate-700/50"
               title={apiStatus === "error" ? `Trying: ${apiUrl}` : undefined}

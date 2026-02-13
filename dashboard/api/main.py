@@ -287,6 +287,7 @@ async def root():
             "explain": "POST /explain",
             "feature_importance": "GET /feature-importance",
             "sample_riders": "GET /sample-riders",
+            "analytics": "GET /analytics",
         },
     }
 
@@ -541,6 +542,184 @@ async def get_sample_riders():
     ]
     
     return {"samples": samples}
+
+
+def get_eda_data_path() -> str:
+    """Path to trip-level data for EDA/analytics."""
+    if os.environ.get("EDA_DATA_PATH"):
+        return os.environ.get("EDA_DATA_PATH")
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    return os.path.join(base_dir, "data", "processed_data", "trip_riders_drivers_df.csv")
+
+
+# In-memory cache for analytics aggregates (computed once)
+_analytics_cache: Optional[Dict[str, Any]] = None
+
+
+def _load_and_aggregate_eda() -> Dict[str, Any]:
+    """Load trip data and compute EDA aggregates for the analytics UI."""
+    global _analytics_cache
+    if _analytics_cache is not None:
+        return _analytics_cache
+
+    path = get_eda_data_path()
+    if not os.path.isfile(path):
+        logger.warning(f"EDA data not found at {path}")
+        return _empty_analytics()
+
+    try:
+        # Load in chunks or sample if very large
+        df = pd.read_csv(path, nrows=100_000)
+    except Exception as e:
+        logger.error(f"Error loading EDA data: {e}")
+        return _empty_analytics()
+
+    # Revenue and derived columns (match notebook)
+    df["revenue"] = (df["fare"] * df["surge_multiplier"]) + df["tip"]
+    df["potential_fare"] = df["fare"] / df["acceptance_rate"].replace(0, np.nan)
+    df["potential_fare"] = df["potential_fare"].fillna(df["fare"])
+
+    # --- Revenue by city (pie + trips by city)
+    total_rev_by_city = df.groupby("city")["revenue"].sum()
+    total_trips_by_city = df.groupby("city")["trip_id"].count()
+    revenue_by_city = [{"name": str(k), "value": round(float(v), 2)} for k, v in total_rev_by_city.items()]
+    trips_by_city = [{"name": str(k), "value": int(v)} for k, v in total_trips_by_city.items()]
+
+    # --- Top / least drivers by revenue
+    total_rev_by_driver = df.groupby("driver_id")["revenue"].sum().reset_index()
+    top_10_driver = total_rev_by_driver.nlargest(10, "revenue")
+    least_10_driver = total_rev_by_driver.nsmallest(10, "revenue")
+    top_10_drivers = [{"name": str(r["driver_id"]), "revenue": round(float(r["revenue"]), 2)} for _, r in top_10_driver.iterrows()]
+    least_10_drivers = [{"name": str(r["driver_id"]), "revenue": round(float(r["revenue"]), 2)} for _, r in least_10_driver.iterrows()]
+
+    # --- Revenue by period of day and season
+    rev_by_period = df.groupby("pickup_period")["revenue"].sum().reset_index()
+    rev_by_season = df.groupby("pickup_season")["revenue"].sum().reset_index()
+    revenue_by_period = [{"name": str(r["pickup_period"]), "revenue": round(float(r["revenue"]), 2)} for _, r in rev_by_period.iterrows()]
+    revenue_by_season = [{"name": str(r["pickup_season"]), "revenue": round(float(r["revenue"]), 2)} for _, r in rev_by_season.iterrows()]
+
+    # --- Revenue by rider age group and loyalty
+    rev_by_age = df.groupby("rider_age_group")["revenue"].sum()
+    rev_by_loyalty = df.groupby("loyalty_status")["revenue"].sum()
+    revenue_by_age = [{"name": str(k), "value": round(float(v), 2)} for k, v in rev_by_age.items()]
+    revenue_by_loyalty = [{"name": str(k), "value": round(float(v), 2)} for k, v in rev_by_loyalty.items()]
+
+    # --- Yearly revenue and trips
+    rev_by_year = df.groupby("pickup_year")["revenue"].sum().reset_index()
+    trips_by_year = df.groupby("pickup_year")["trip_id"].count().reset_index()
+    revenue_by_year = [{"name": str(int(r["pickup_year"])), "revenue": round(float(r["revenue"]), 2)} for _, r in rev_by_year.iterrows()]
+    trips_by_year_list = [{"name": str(int(r["pickup_year"])), "trips": int(r["trip_id"])} for _, r in trips_by_year.iterrows()]
+    merged_year = rev_by_year.merge(trips_by_year, on="pickup_year")
+    annual_revenue_vs_trips = [
+        {"revenue": round(float(r["revenue"]), 2), "trips": int(r["trip_id"])}
+        for _, r in merged_year.iterrows()
+    ]
+
+    # --- Vehicle type
+    rev_by_vehicle = df.groupby("vehicle_type")["revenue"].sum().reset_index().sort_values("revenue", ascending=False)
+    trips_by_vehicle = df.groupby("vehicle_type")["trip_id"].count().reset_index().sort_values("trip_id", ascending=False)
+    revenue_by_vehicle = [{"name": str(r["vehicle_type"]), "revenue": round(float(r["revenue"]), 2)} for _, r in rev_by_vehicle.iterrows()]
+    trips_by_vehicle_list = [{"name": str(r["vehicle_type"]), "trips": int(r["trip_id"])} for _, r in trips_by_vehicle.iterrows()]
+
+    # --- Weather: surge and fare
+    weather_surge = df.groupby("weather")["surge_multiplier"].mean().reset_index()
+    weather_fare = df.groupby("weather")["fare"].mean().reset_index()
+    surge_by_weather = [{"name": str(r["weather"]), "surge": round(float(r["surge_multiplier"]), 4)} for _, r in weather_surge.iterrows()]
+    fare_by_weather = [{"name": str(r["weather"]), "fare": round(float(r["fare"]), 2)} for _, r in weather_fare.iterrows()]
+
+    # --- Ratings vs churn: by rating bin for clearer trend (match notebook insight)
+    driver_rating_churn = df.groupby("rating_by_driver")["churn_prob"].mean().reset_index()
+    rider_rating_churn = df.groupby("rating_by_rider")["churn_prob"].mean().reset_index()
+    driver_rating_churn_list = [
+        {"rating": round(float(r["rating_by_driver"]), 2), "churn_prob": round(float(r["churn_prob"]), 4)}
+        for _, r in driver_rating_churn.iterrows()
+    ]
+    rider_rating_churn_list = [
+        {"rating": round(float(r["rating_by_rider"]), 2), "churn_prob": round(float(r["churn_prob"]), 4)}
+        for _, r in rider_rating_churn.iterrows()
+    ]
+
+    # --- Rider vs driver ratings per city
+    gap_data = df.groupby("city")[["rating_by_driver", "rating_by_rider"]].mean().reset_index()
+    ratings_by_city = []
+    for _, r in gap_data.iterrows():
+        ratings_by_city.append({"city": str(r["city"]), "rating_by_driver": round(float(r["rating_by_driver"]), 2), "rating_by_rider": round(float(r["rating_by_rider"]), 2)})
+
+    # --- Revenue leakage (potential_fare - fare by city)
+    leakage = df.groupby("city")[["fare", "potential_fare"]].sum().reset_index()
+    leakage["lost_revenue"] = leakage["potential_fare"] - leakage["fare"]
+    revenue_leakage = [{"name": str(r["city"]), "lost_revenue": round(float(r["lost_revenue"]), 2)} for _, r in leakage.iterrows()]
+
+    # --- Acceptance rate by weather
+    weather_acceptance = df.groupby("weather")["acceptance_rate"].mean()
+    acceptance_by_weather = [{"name": str(k), "acceptance_rate": round(float(v), 4)} for k, v in weather_acceptance.items()]
+
+    _analytics_cache = {
+        "revenue_by_city": revenue_by_city,
+        "trips_by_city": trips_by_city,
+        "top_10_drivers": top_10_drivers,
+        "least_10_drivers": least_10_drivers,
+        "revenue_by_period": revenue_by_period,
+        "revenue_by_season": revenue_by_season,
+        "revenue_by_age": revenue_by_age,
+        "revenue_by_loyalty": revenue_by_loyalty,
+        "revenue_by_year": revenue_by_year,
+        "trips_by_year": trips_by_year_list,
+        "annual_revenue_vs_trips": annual_revenue_vs_trips,
+        "revenue_by_vehicle": revenue_by_vehicle,
+        "trips_by_vehicle": trips_by_vehicle_list,
+        "surge_by_weather": surge_by_weather,
+        "fare_by_weather": fare_by_weather,
+        "driver_rating_churn": driver_rating_churn_list,
+        "rider_rating_churn": rider_rating_churn_list,
+        "ratings_by_city": ratings_by_city,
+        "revenue_leakage": revenue_leakage,
+        "acceptance_by_weather": acceptance_by_weather,
+    }
+    return _analytics_cache
+
+
+def _empty_analytics() -> Dict[str, Any]:
+    """Return empty analytics structure when data is unavailable."""
+    return {
+        "revenue_by_city": [],
+        "trips_by_city": [],
+        "top_10_drivers": [],
+        "least_10_drivers": [],
+        "revenue_by_period": [],
+        "revenue_by_season": [],
+        "revenue_by_age": [],
+        "revenue_by_loyalty": [],
+        "revenue_by_year": [],
+        "trips_by_year": [],
+        "annual_revenue_vs_trips": [],
+        "revenue_by_vehicle": [],
+        "trips_by_vehicle": [],
+        "surge_by_weather": [],
+        "fare_by_weather": [],
+        "driver_rating_churn": [],
+        "rider_rating_churn": [],
+        "ratings_by_city": [],
+        "revenue_leakage": [],
+        "acceptance_by_weather": [],
+    }
+
+
+@app.get("/analytics", tags=["Analytics"])
+async def get_analytics():
+    """
+    Get pre-aggregated EDA/analytics data for the dashboard.
+    Data is derived from trip-level data (revenue, trips by city, period, season, etc.).
+    """
+    try:
+        data = _load_and_aggregate_eda()
+        return data
+    except Exception as e:
+        logger.error(f"Analytics error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Analytics failed: {str(e)}"
+        )
 
 
 if __name__ == "__main__":
