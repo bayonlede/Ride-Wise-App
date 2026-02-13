@@ -33,11 +33,11 @@
     @apply bg-slate-950 text-slate-100 antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
 
-    /* Subtle ride-hailing background with dark overlay.
-       Place your image at: frontend/public/ridewise-hero.png */
+    /* Subtle ride-hailing background with dark overlay
+       using external Shutterstock-style image. */
     background-image:
       linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.94)),
-      url("/ridewise-hero.png");
+      url("https://cdn.prod.website-files.com/5f9ff3f1191b5c62e3fb4c26/61a59ee6833d3904d662989c_shutterstock_1832852956%20(1).jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
