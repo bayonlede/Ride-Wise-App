@@ -26,7 +26,7 @@ import {
   CheckCircle,
   ChevronDown,
   Clock,
-  DollarSign,
+  PoundSterling,
   Gauge,
   Heart,
   Info,
@@ -331,8 +331,8 @@ function PredictionForm({
 
         <div>
           <label className="label flex items-center gap-2">
-            <DollarSign className="w-3.5 h-3.5" />
-            Monetary (total spent)
+            <PoundSterling className="w-3.5 h-3.5" />
+            Monetary (total spent, £)
           </label>
           <input
             type="number"
@@ -341,7 +341,7 @@ function PredictionForm({
             value={features.monetary}
             onChange={(e) => handleInputChange("monetary", Number(e.target.value))}
             className="input-field"
-            placeholder="Total spending"
+            placeholder="Total spending (£)"
           />
         </div>
 

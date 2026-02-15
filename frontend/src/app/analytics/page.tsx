@@ -24,7 +24,7 @@ import {
   ArrowLeft,
   BarChart3,
   Cloud,
-  DollarSign,
+  PoundSterling,
   Loader2,
   TrendingUp,
   Users,
@@ -179,11 +179,11 @@ export default function AnalyticsPage() {
         {/* Revenue Overview */}
         <section className="mb-10">
           <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-            <DollarSign className="w-6 h-6 text-brand-400" />
+            <PoundSterling className="w-6 h-6 text-brand-400" />
             Revenue Overview
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <SectionCard title="Total Revenue by City" icon={DollarSign}>
+            <SectionCard title="Total Revenue by City" icon={PoundSterling}>
               {data.revenue_by_city.length > 0 ? (
                 <ResponsiveContainer width="100%" height={280}>
                   <PieChart>
@@ -200,7 +200,7 @@ export default function AnalyticsPage() {
                         <Cell key={i} fill={COLORS[i % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(v: number) => [`$${v.toLocaleString()}`, "Revenue"]} />
+                    <Tooltip formatter={(v: number) => [`£${v.toLocaleString()}`, "Revenue"]} />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
@@ -246,9 +246,9 @@ export default function AnalyticsPage() {
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={data.top_10_drivers} layout="vertical" margin={{ left: 80 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                    <XAxis type="number" stroke="#94a3b8" tickFormatter={(v) => `$${v}`} />
+                    <XAxis type="number" stroke="#94a3b8" tickFormatter={(v) => `£${v}`} />
                     <YAxis type="category" dataKey="name" stroke="#94a3b8" width={70} tick={{ fontSize: 11 }} />
-                    <Tooltip formatter={(v: number) => [`$${v.toLocaleString()}`, "Revenue"]} />
+                    <Tooltip formatter={(v: number) => [`£${v.toLocaleString()}`, "Revenue"]} />
                     <Bar dataKey="revenue" fill="#10b981" radius={[0, 4, 4, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -261,9 +261,9 @@ export default function AnalyticsPage() {
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={data.least_10_drivers} layout="vertical" margin={{ left: 80 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                    <XAxis type="number" stroke="#94a3b8" tickFormatter={(v) => `$${v}`} />
+                    <XAxis type="number" stroke="#94a3b8" tickFormatter={(v) => `£${v}`} />
                     <YAxis type="category" dataKey="name" stroke="#94a3b8" width={70} tick={{ fontSize: 11 }} />
-                    <Tooltip formatter={(v: number) => [`$${v.toLocaleString()}`, "Revenue"]} />
+                    <Tooltip formatter={(v: number) => [`£${v.toLocaleString()}`, "Revenue"]} />
                     <Bar dataKey="revenue" fill="#64748b" radius={[0, 4, 4, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -287,8 +287,8 @@ export default function AnalyticsPage() {
                   <LineChart data={data.revenue_by_period}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                     <XAxis dataKey="name" stroke="#94a3b8" />
-                    <YAxis stroke="#94a3b8" tickFormatter={(v) => `$${v / 1000}k`} />
-                    <Tooltip formatter={(v: number) => [`$${v.toLocaleString()}`, "Revenue"]} />
+                    <YAxis stroke="#94a3b8" tickFormatter={(v) => `£${v / 1000}k`} />
+                    <Tooltip formatter={(v: number) => [`£${v.toLocaleString()}`, "Revenue"]} />
                     <Line type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} dot={{ fill: "#10b981" }} />
                   </LineChart>
                 </ResponsiveContainer>
@@ -302,8 +302,8 @@ export default function AnalyticsPage() {
                   <LineChart data={data.revenue_by_season}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                     <XAxis dataKey="name" stroke="#94a3b8" />
-                    <YAxis stroke="#94a3b8" tickFormatter={(v) => `$${v / 1000}k`} />
-                    <Tooltip formatter={(v: number) => [`$${v.toLocaleString()}`, "Revenue"]} />
+                    <YAxis stroke="#94a3b8" tickFormatter={(v) => `£${v / 1000}k`} />
+                    <Tooltip formatter={(v: number) => [`£${v.toLocaleString()}`, "Revenue"]} />
                     <Line type="monotone" dataKey="revenue" stroke="#06b6d4" strokeWidth={2} dot={{ fill: "#06b6d4" }} />
                   </LineChart>
                 </ResponsiveContainer>
@@ -338,14 +338,14 @@ export default function AnalyticsPage() {
                         <Cell key={i} fill={COLORS[i % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(v: number) => [`$${v.toLocaleString()}`, "Revenue"]} />
+                    <Tooltip formatter={(v: number) => [`£${v.toLocaleString()}`, "Revenue"]} />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
                 <p className="text-slate-500 py-8 text-center">No data</p>
               )}
             </SectionCard>
-            <SectionCard title="Revenue by Loyalty Status" icon={DollarSign}>
+            <SectionCard title="Revenue by Loyalty Status" icon={PoundSterling}>
               {data.revenue_by_loyalty.length > 0 ? (
                 <ResponsiveContainer width="100%" height={280}>
                   <PieChart>
@@ -362,7 +362,7 @@ export default function AnalyticsPage() {
                         <Cell key={i} fill={COLORS[(i + 3) % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(v: number) => [`$${v.toLocaleString()}`, "Revenue"]} />
+                    <Tooltip formatter={(v: number) => [`£${v.toLocaleString()}`, "Revenue"]} />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
@@ -379,14 +379,14 @@ export default function AnalyticsPage() {
             Annual & Vehicle Trends
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <SectionCard title="Yearly Revenue" icon={DollarSign}>
+            <SectionCard title="Yearly Revenue" icon={PoundSterling}>
               {data.revenue_by_year.length > 0 ? (
                 <ResponsiveContainer width="100%" height={220}>
                   <BarChart data={data.revenue_by_year}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                     <XAxis dataKey="name" stroke="#94a3b8" />
-                    <YAxis stroke="#94a3b8" tickFormatter={(v) => `$${v / 1000}k`} />
-                    <Tooltip formatter={(v: number) => [`$${v.toLocaleString()}`, "Revenue"]} />
+                    <YAxis stroke="#94a3b8" tickFormatter={(v) => `£${v / 1000}k`} />
+                    <Tooltip formatter={(v: number) => [`£${v.toLocaleString()}`, "Revenue"]} />
                     <Bar dataKey="revenue" fill="#10b981" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -414,9 +414,9 @@ export default function AnalyticsPage() {
                 <ResponsiveContainer width="100%" height={220}>
                   <ScatterChart>
                     <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                    <XAxis dataKey="revenue" name="Revenue" stroke="#94a3b8" tickFormatter={(v) => `$${v / 1000}k`} />
+                    <XAxis dataKey="revenue" name="Revenue" stroke="#94a3b8" tickFormatter={(v) => `£${v / 1000}k`} />
                     <YAxis dataKey="trips" name="Trips" stroke="#94a3b8" />
-                    <Tooltip formatter={(v: number, n: string) => [n === "revenue" ? `$${v?.toLocaleString()}` : v?.toLocaleString(), n]} />
+                    <Tooltip formatter={(v: number, n: string) => [n === "revenue" ? `£${v?.toLocaleString()}` : v?.toLocaleString(), n]} />
                     <Scatter data={data.annual_revenue_vs_trips} fill="#f59e0b" />
                   </ScatterChart>
                 </ResponsiveContainer>
@@ -431,9 +431,9 @@ export default function AnalyticsPage() {
                 <ResponsiveContainer width="100%" height={260}>
                   <BarChart data={data.revenue_by_vehicle} layout="vertical" margin={{ left: 90 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                    <XAxis type="number" stroke="#94a3b8" tickFormatter={(v) => `$${v / 1000}k`} />
+                    <XAxis type="number" stroke="#94a3b8" tickFormatter={(v) => `£${v / 1000}k`} />
                     <YAxis type="category" dataKey="name" stroke="#94a3b8" width={85} />
-                    <Tooltip formatter={(v: number) => [`$${v.toLocaleString()}`, "Revenue"]} />
+                    <Tooltip formatter={(v: number) => [`£${v.toLocaleString()}`, "Revenue"]} />
                     <Bar dataKey="revenue" fill="#14b8a6" radius={[0, 4, 4, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -481,14 +481,14 @@ export default function AnalyticsPage() {
                 <p className="text-slate-500 py-8 text-center">No data</p>
               )}
             </SectionCard>
-            <SectionCard title="Avg Fare by Weather" icon={DollarSign}>
+            <SectionCard title="Avg Fare by Weather" icon={PoundSterling}>
               {data.fare_by_weather.length > 0 ? (
                 <ResponsiveContainer width="100%" height={240}>
                   <BarChart data={data.fare_by_weather}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                     <XAxis dataKey="name" stroke="#94a3b8" />
-                    <YAxis stroke="#94a3b8" tickFormatter={(v) => `$${v}`} />
-                    <Tooltip formatter={(v: number) => [`$${v.toFixed(2)}`, "Fare"]} />
+                    <YAxis stroke="#94a3b8" tickFormatter={(v) => `£${v}`} />
+                    <Tooltip formatter={(v: number) => [`£${v.toFixed(2)}`, "Fare"]} />
                     <Bar dataKey="fare" fill="#10b981" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -577,14 +577,14 @@ export default function AnalyticsPage() {
             <AlertTriangle className="w-6 h-6 text-amber-400" />
             Revenue Leakage (Low Acceptance)
           </h2>
-          <SectionCard title="Estimated Lost Revenue by City" icon={DollarSign}>
+          <SectionCard title="Estimated Lost Revenue by City" icon={PoundSterling}>
             {data.revenue_leakage.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={data.revenue_leakage}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                   <XAxis dataKey="name" stroke="#94a3b8" />
-                  <YAxis stroke="#94a3b8" tickFormatter={(v) => `$${v / 1000}k`} />
-                  <Tooltip formatter={(v: number) => [`$${v?.toLocaleString()}`, "Lost revenue"]} />
+                  <YAxis stroke="#94a3b8" tickFormatter={(v) => `£${v / 1000}k`} />
+                  <Tooltip formatter={(v: number) => [`£${v?.toLocaleString()}`, "Lost revenue"]} />
                   <Bar dataKey="lost_revenue" fill="#f59e0b" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
